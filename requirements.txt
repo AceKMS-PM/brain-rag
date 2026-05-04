@@ -1,0 +1,8 @@
+lancedb
+llama-cpp-python
+fastapi
+uvicorn
+python-multipart
+python-frontmatter
+rank-bm25
+pypdf

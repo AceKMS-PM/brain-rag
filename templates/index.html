@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain AI | Second Brain</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+        
+        :root {
+            --bg-deep: #050a18;
+            --bg-panel: #0b1326;
+            --accent: #d0bcff;
+            --accent-dark: #b8a0ff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-deep);
+            color: #e8eaed;
+        }
+
+        .glass-panel {
+            background: rgba(11, 19, 38, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(60, 67, 84, 0.5);
+        }
+
+        .chat-bubble-user {
+            background: linear-gradient(135deg, #2d3a4f 0%, #1b2838 100%);
+            border-bottom-right-radius: 2px;
+        }
+
+        .chat-bubble-assistant {
+            background: rgba(27, 40, 56, 0.5);
+            border: 1px solid rgba(60, 67, 84, 0.3);
+            border-bottom-left-radius: 2px;
+        }
+
+        .reasoning-block {
+            background: rgba(208, 188, 255, 0.05);
+            border-left: 3px solid var(--accent);
+            font-size: 0.875rem;
+            color: #9aa0a6;
+        }
+
+        pre code {
+            font-family: 'Fira Code', monospace !important;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3c4354; border-radius: 10px; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-message { animation: fadeInUp 0.3s ease forwards; }
+    </style>
+</head>
+<body class="h-screen overflow-hidden flex">
+
+    <!-- Sidebar -->
+    <aside class="w-72 glass-panel h-full flex flex-col z-20">
+        <div class="p-4 border-b border-slate-800 flex items-center gap-3">
+            <div class="p-2 bg-indigo-500/20 rounded-lg">
+                <i data-lucide="brain" class="text-indigo-400 w-5 h-5"></i>
+            </div>
+            <h1 class="font-bold text-lg tracking-tight">Brain AI <span class="text-xs font-normal opacity-50">2.0</span></h1>
+        </div>
+
+        <div class="p-3">
+            <button onclick="newChat()" class="w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-400 text-white py-2.5 px-4 rounded-xl font-medium transition-all active:scale-95 shadow-lg shadow-indigo-500/20">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Nouveau Chat
+            </button>
+        </div>
+
+        <div id="chatHistory" class="flex-1 overflow-y-auto custom-scrollbar px-3 py-2 space-y-1">
+            <!-- History items injected here -->
+        </div>
+
+        <div class="p-4 border-t border-slate-800 text-xs text-slate-500 flex justify-between items-center">
+            <span>v2.0.0-alpha</span>
+            <div id="docStatus" class="flex items-center gap-1">
+                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                <span id="docCount">0</span> chunks
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col relative min-w-0">
+        <!-- Header -->
+        <header class="h-16 glass-panel flex items-center justify-between px-6 z-10">
+            <div class="flex items-center gap-4">
+                <div class="text-sm text-slate-400" id="currentChatTitle">
+                    Session Active
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <label class="flex items-center gap-3 cursor-pointer group">
+                    <span class="text-xs font-medium text-slate-400 group-hover:text-slate-200 transition-colors">🌐 Web Search</span>
+                    <div class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="webSearchToggle" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-500"></div>
+                    </div>
+                </label>
+            </div>
+        </header>
+
+        <!-- Chat Area -->
+        <div id="chat" class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6 pb-32">
+            <!-- Messages injected here -->
+        </div>
+
+        <!-- Input Area -->
+        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#050a18] via-[#050a18]/90 to-transparent">
+            <div class="max-w-4xl mx-auto relative">
+                <div class="glass-panel rounded-2xl p-2 flex items-end gap-2 shadow-2xl border-indigo-500/20 focus-within:border-indigo-500/50 transition-all">
+                    <select id="modelSelect" class="bg-slate-800 border border-slate-600 text-xs text-slate-300 rounded-lg px-2 py-2 outline-none hover:border-indigo-500/50">
+                        <option value="llama">🦙 Llama - Rapide</option>
+                        <option value="qwen">🐼 Qwen - Équilibré</option>
+                        <option value="gemma">🔷 Gemma - Puissant</option>
+                    </select>
+                    <textarea 
+                        id="question" 
+                        rows="1" 
+                        placeholder="Posez une question à votre Second Brain..."
+                        class="flex-1 bg-transparent border-none outline-none resize-none py-3 px-4 text-sm max-h-40 custom-scrollbar"
+                        onkeydown="handleKey(event)"
+                    ></textarea>
+                    <button id="sendBtn" onclick="sendMessage()" 
+                        class="bg-indigo-500 hover:bg-indigo-400 text-white p-2.5 rounded-xl transition-all disabled:opacity-50 active:scale-90 shadow-lg shadow-indigo-500/30">
+                        <i data-lucide="send-horizontal" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div class="text-center mt-3">
+                    <span class="text-[10px] text-slate-600 uppercase tracking-widest font-medium">Powered by Llama • Gemma • Qwen & LanceDB</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let chatHistory = [];
+        let currentChatId = Date.now();
+
+        // Initialize
+        window.onload = () => {
+            lucide.createIcons();
+            loadHistory();
+            updateDocCount();
+            newChat();
+        };
+
+        function handleKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function renderMarkdown(text) {
+            return marked.parse(text);
+        }
+
+        function createMessageElement(text, isUser = false, reasoning = null, sources = []) {
+            const div = document.createElement('div');
+            div.className = `flex ${isUser ? 'justify-end' : 'justify-start'} animate-message`;
+            
+            let content = '';
+            if (isUser) {
+                content = `<div class="chat-bubble-user px-4 py-3 rounded-2xl max-w-[80%] text-sm shadow-sm">${renderMarkdown(text)}</div>`;
+            } else {
+                let reasoningHtml = reasoning ? 
+                    `<div class="reasoning-block p-3 rounded-lg mb-3 italic">
+                        <div class="text-[10px] uppercase font-bold text-indigo-400 mb-1">Raisonnement</div>
+                        ${renderMarkdown(reasoning)}
+                    </div>` : '';
+                
+                let sourcesHtml = sources.length ? 
+                    `<div class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-700/50">
+                        ${sources.map(s => `<span class="text-[10px] bg-slate-800 text-indigo-300 px-2 py-1 rounded border border-indigo-500/20 cursor-pointer hover:bg-slate-700 transition-colors">${s.filename}</span>`).join('')}
+                    </div>` : '';
+
+                content = `<div class="chat-bubble-assistant px-4 py-3 rounded-2xl max-w-[80%] text-sm shadow-sm">
+                    ${reasoningHtml}
+                    <div class="prose prose-invert">${renderMarkdown(text)}</div>
+                    ${sourcesHtml}
+                </div>`;
+            }
+            
+            div.innerHTML = content;
+            return div;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('question');
+            const btn = document.getElementById('sendBtn');
+            const chat = document.getElementById('chat');
+            const question = input.value.trim();
+            
+            if (!question) return;
+            
+            // Get selected model
+            const selectedModel = document.getElementById('modelSelect').value;
+            
+            // Add user message
+            chat.appendChild(createMessageElement(question, true));
+            
+            // Loading state
+            const modelNames = { llama: 'Llama', gemma: 'Gemma', qwen: 'Qwen' };
+            const modelLabel = modelNames[selectedModel] || 'Auto';
+            const loading = document.createElement('div');
+            loading.id = 'loading';
+            loading.className = 'flex justify-start animate-message';
+            loading.innerHTML = `<div class="chat-bubble-assistant px-4 py-3 rounded-2xl text-sm text-slate-400 italic flex items-center gap-2">
+                <div class="flex gap-1">
+                    <span class="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce"></span>
+                    <span class="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                    <span class="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                </div>
+                ${modelLabel} analyse les documents...
+            </div>`;
+            chat.appendChild(loading);
+            chat.scrollTop = chat.scrollHeight;
+            
+            input.value = '';
+            input.disabled = true;
+            btn.disabled = true;
+            
+            try {
+                const webSearch = document.getElementById('webSearchToggle').checked;
+                const selectedModel = document.getElementById('modelSelect').value;
+                const response = await fetch('/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question, web_search: webSearch, model: selectedModel })
+                });
+                
+                const data = await response.json();
+                loading.remove();
+                
+                chat.appendChild(createMessageElement(data.answer, false, data.reasoning, data.sources));
+                
+                chatHistory.push({ id: currentChatId, question: question, timestamp: Date.now() });
+                saveHistory();
+            } catch (error) {
+                loading.remove();
+                chat.appendChild(createMessageElement(`❌ Erreur: ${error.message}`, false));
+            }
+            
+            chat.scrollTop = chat.scrollHeight;
+            input.disabled = false;
+            btn.disabled = true; // actually should be false
+            btn.disabled = false;
+            input.focus();
+            
+            // Trigger highlight.js for new code blocks
+            document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+        }
+
+        function newChat() {
+            currentChatId = Date.now();
+            const chat = document.getElementById('chat');
+            chat.innerHTML = '';
+            chat.appendChild(createMessageElement("Bonjour! Je suis votre Second Brain. Comment puis-je vous aider aujourd'hui ?", false));
+            document.getElementById('currentChatTitle').textContent = "Nouvelle Session";
+        }
+
+        function saveHistory() {
+            localStorage.setItem('brain-ai-history', JSON.stringify(chatHistory.slice(-50)));
+        }
+
+        function loadHistory() {
+            const saved = localStorage.getItem('brain-ai-history');
+            if (saved) {
+                chatHistory = JSON.parse(saved);
+                renderHistory();
+            }
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('chatHistory');
+            container.innerHTML = '';
+            
+            const grouped = {};
+            chatHistory.forEach(chat => {
+                const date = new Date(chat.timestamp).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric' });
+                if (!grouped[date]) grouped[date] = [];
+                grouped[date].push(chat);
+            });
+            
+            for (const [date, chats] of Object.entries(grouped)) {
+                const dateDiv = document.createElement('div');
+                dateDiv.className = 'text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 mt-4 mb-2';
+                dateDiv.textContent = date;
+                container.appendChild(dateDiv);
+                
+                chats.slice(-5).forEach(chat => {
+                    const item = document.createElement('div');
+                    item.className = 'p-2 text-sm rounded-lg cursor-pointer text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all truncate';
+                    item.textContent = chat.question;
+                    item.onclick = () => loadChat(chat.question);
+                    container.appendChild(item);
+                });
+            }
+        }
+
+        function loadChat(question) {
+            document.getElementById('question').value = question;
+            sendMessage();
+        }
+
+        async function updateDocCount() {
+            try {
+                const r = await fetch('/stats');
+                const d = await r.json();
+                document.getElementById('docCount').textContent = d.chunks || 0;
+            } catch (e) {
+                document.getElementById('docCount').textContent = '0';
+            }
+        }
+    </script>
+</body>
+</html>

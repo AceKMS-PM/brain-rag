@@ -1,0 +1,43 @@
+#!/bin/bash
+cd "$(dirname "$0")"
+
+PID_FILE="/tmp/brain-ai.pid"
+
+start() {
+    echo "🧠 Starting Second Brain..."
+    source venv/bin/activate
+    python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+    echo $! > $PID_FILE
+    echo "🚀 Started on http://localhost:8000"
+}
+
+stop() {
+    if [ -f "$PID_FILE" ]; then
+        kill $(cat $PID_FILE) 2>/dev/null
+        rm $PID_FILE
+        echo "🛑 Stopped brain-ai"
+    else
+        echo "❌ Not running (no PID file)"
+    fi
+}
+
+status() {
+    if [ -f "$PID_FILE" ]; then
+        PID=$(cat $PID_FILE)
+        if kill -0 $PID 2>/dev/null; then
+            echo "✅ Running (PID: $PID)"
+        else
+            echo "⚠️ Stale PID file"
+            rm $PID_FILE
+        fi
+    else
+        echo "❌ Not running"
+    fi
+}
+
+case "$1" in
+    start) start ;;
+    stop) stop ;;
+    status) status ;;
+    *) echo "Usage: brain-ai {start|stop|status}" ;;
+esac
