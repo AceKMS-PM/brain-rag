@@ -33,3 +33,8 @@ node_modules/
 
 # Rust (for future)
 target/
+
+# Tauri
+src-tauri/target/
+src-tauri/gen/
+node_modules/

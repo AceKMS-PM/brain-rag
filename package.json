@@ -1,0 +1,27 @@
+{
+  "name": "rag-service",
+  "version": "1.0.0",
+  "description": "Système RAG (Retrieval-Augmented Generation) fonctionnant entièrement en local, sans dépendance cloud externe.",
+  "main": "index.js",
+  "scripts": {
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AceKMS-PM/brain-rag.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AceKMS-PM/brain-rag/issues"
+  },
+  "homepage": "https://github.com/AceKMS-PM/brain-rag#readme",
+  "devDependencies": {
+    "@tauri-apps/api": "^2.11.0",
+    "@tauri-apps/cli": "^2.11.0"
+  }
+}
