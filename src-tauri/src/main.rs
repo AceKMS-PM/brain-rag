@@ -76,7 +76,7 @@ fn main() {
             // Auto-start backend on window open
             if let Ok(mut pid_guard) = BACKEND_PID.lock() {
                 if pid_guard.is_none() {
-                    if let Ok(child) = Command::new("python3")
+                    if let Ok(child) = Command::new("/home/kurtdegla/brain/rag-service/venv/bin/python")
                         .args(["-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"])
                         .current_dir("/home/kurtdegla/brain/rag-service")
                         .spawn()
