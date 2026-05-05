@@ -91,6 +91,8 @@ Detailed docs in `/DOCS/`:
 - [ ] Session memory (remember context across queries)
 - [ ] Document management UI (add/remove/reindex)
 - [ ] Better error handling and retry logic
+- [ ] Resolve CORS issues between Tauri and FastAPI
+- [ ] Optimize model loading to prevent OOM crashes on 4GB RAM
 
 ### Medium Priority
 - [ ] Web search integration (SearXNG or Tavily)
@@ -98,6 +100,7 @@ Detailed docs in `/DOCS/`:
 - [ ] Conversation export (markdown, PDF)
 - [ ] Search result highlighting
 - [ ] Response feedback system
+- [ ] Implement unified lifecycle management ( backend management within Rust process)
 
 ### Low Priority
 - [ ] Docker packaging for easy deployment
