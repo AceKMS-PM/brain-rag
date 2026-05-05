@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from app import ingest, search, llm, webui, websearch
 import re
@@ -7,6 +8,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="RAG Service", description="Local RAG with GGUF models")
+
+# Enable CORS for Tauri frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins - adjust for production
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 # Enable custom web UI
 webui.setup_webui(app)

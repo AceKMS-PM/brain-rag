@@ -240,7 +240,7 @@
             try {
                 const webSearch = document.getElementById('webSearchToggle').checked;
                 const selectedModel = document.getElementById('modelSelect').value;
-                const response = await fetch('/query', {
+                const response = await fetch(API_BASE_URL + '/query', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ question, web_search: webSearch, model: selectedModel })
@@ -322,7 +322,7 @@
 
         async function updateDocCount() {
             try {
-                const r = await fetch('/stats');
+                const r = await fetch(API_BASE_URL + '/stats');
                 const d = await r.json();
                 document.getElementById('docCount').textContent = d.chunks || 0;
             } catch (e) {
