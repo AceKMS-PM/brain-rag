@@ -18,7 +18,7 @@ fn start_backend() -> Result<String, String> {
         return Ok("Backend already running".to_string());
     }
     
-    let child = Command::new("python3")
+    let child = Command::new("/home/kurtdegla/brain/rag-service/venv/bin/python")
         .args(["-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"])
         .current_dir("/home/kurtdegla/brain/rag-service")
         .spawn()
