@@ -4,13 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brain AI | Second Brain</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="lib/tailwindcss.js"></script>
+    <script src="lib/marked.min.js"></script>
+    <link rel="stylesheet" href="lib/highlight.css">
+    <script src="lib/highlight.min.js"></script>
+    <script src="lib/lucide.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+        @font-face {
+            font-family: 'Inter';
+            src: local('Inter'), local('Inter-Regular');
+            font-weight: 300 700;
+        }
+        @font-face {
+            font-family: 'Fira Code';
+            src: local('Fira Code'), local('FiraCode-Regular');
+            font-weight: 400 500;
+        }
+        /* Fallback fonts if local not found */
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         
         :root {
             --bg-deep: #050a18;
